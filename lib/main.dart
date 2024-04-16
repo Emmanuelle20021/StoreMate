@@ -11,7 +11,7 @@ class ShopMate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ShopMate',
+      title: 'StoreMate',
       home: const HomeScreen(),
       themeMode: ThemeMode.system,
       theme: lightTheme,
