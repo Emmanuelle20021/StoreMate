@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:store_mate/constants/themes.dart';
+import 'package:store_mate/screens/home_screen.dart';
+import 'package:store_mate/screens/new_product_screen.dart';
+import 'package:store_mate/screens/new_sale_screen.dart';
+import 'package:store_mate/screens/products_screen.dart';
+// import 'package:store_mate/screens/sales_screen.dart';
 
 void main() {
   runApp(const ShopMate());
@@ -12,7 +17,7 @@ class ShopMate extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'StoreMate',
-      home: const HomeScreen(),
+      home: const MainScreen(),
       themeMode: ThemeMode.system,
       theme: lightTheme,
       darkTheme: darkTheme,
@@ -20,29 +25,34 @@ class ShopMate extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   final _pageController = PageController(initialPage: 0);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: _currentIndex == 0 ? _newSale : _newProduct,
+        tooltip: _currentIndex == 0 ? 'Nueva venta' : 'Nuevo producto',
+        backgroundColor: Theme.of(context).primaryColor,
+        child: Icon(
+          Icons.add,
+          semanticLabel: _currentIndex == 0 ? 'Nueva venta' : 'Nuevo producto',
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: PageView(
         controller: _pageController,
         children: const [
-          SalesScreen(),
-          Center(
-            child: Text('Welcome to page 2'),
-          ),
-          Center(
-            child: Text('Welcome to page 3'),
-          ),
+          HomeScreen(),
+          ProductListScreen(),
         ],
         onPageChanged: (index) => _changePage(index),
       ),
@@ -51,16 +61,12 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: (index) => _changePage(index),
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.store),
             label: 'Inicio',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
             label: 'Productos',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Configuración',
           ),
         ],
       ),
@@ -73,113 +79,22 @@ class _HomeScreenState extends State<HomeScreen> {
       _currentIndex = index;
     });
   }
-}
 
-class SalesScreen extends StatefulWidget {
-  const SalesScreen({super.key});
-
-  @override
-  State<SalesScreen> createState() => _SalesScreenState();
-}
-
-class _SalesScreenState extends State<SalesScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ventas'),
-      ),
-      body: const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            SalesSummaryWidget(
-              totalSales: 100,
-              numberOfTransactions: 21,
-              averageSale: 50,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Nueva venta',
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-}
-
-class SalesSummaryWidget extends StatelessWidget {
-  final double totalSales;
-  final int numberOfTransactions;
-  final double averageSale;
-
-  const SalesSummaryWidget({
-    super.key,
-    required this.totalSales,
-    required this.numberOfTransactions,
-    required this.averageSale,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.blue,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Resumen de Ventas',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 10.0),
-          Wrap(
-            spacing: 20.0,
-            children: [
-              _buildSummaryItem(
-                  'Total de Ventas', '\$${totalSales.toStringAsFixed(2)}'),
-              _buildSummaryItem(
-                  'Número de Transacciones', numberOfTransactions.toString()),
-              _buildSummaryItem(
-                  'Venta Promedio', '\$${averageSale.toStringAsFixed(2)}'),
-            ],
-          ),
-        ],
+  void _newSale() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const NewSaleScreen(),
       ),
     );
   }
 
-  Widget _buildSummaryItem(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16.0,
-          ),
-        ),
-        const SizedBox(height: 5.0),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
+  void _newProduct() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const NewProductScreen(),
+      ),
     );
   }
 }
