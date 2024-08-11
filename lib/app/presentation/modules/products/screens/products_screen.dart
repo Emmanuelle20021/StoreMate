@@ -33,7 +33,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
   Widget build(BuildContext context) {
     ProductRepository productRepository =
         Injector.of(context).productRepository;
-    ProductsCubit productsCubit = context.watch<ProductsCubit>();
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: kPrimary,
@@ -97,19 +96,23 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         textController: searchController,
                         onSuffixTap: () async {
                           searchController.clear();
-                          productsCubit.changeProducts(
-                            await productRepository.getProducts() ?? [],
-                          );
+                          context.read<ProductsCubit>().changeProducts(
+                                await productRepository.getProducts() ?? [],
+                              );
                         },
                         onSubmitted: (value) {
-                          List<Product> filteredProducts = productsCubit.state
+                          List<Product> filteredProducts = context
+                              .read<ProductsCubit>()
+                              .state
                               .where(
                                 (element) => element.name
                                     .toLowerCase()
                                     .contains(value.toLowerCase()),
                               )
                               .toList();
-                          productsCubit.changeProducts(filteredProducts);
+                          context
+                              .read<ProductsCubit>()
+                              .changeProducts(filteredProducts);
                         },
                         color: kPrimary,
                         searchIconColor: kOnPrimary,
@@ -125,8 +128,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   ),
                   Expanded(
                     child: BlocBuilder<ProductsCubit, List<Product>>(
-                      builder: (context, products) {
-                        if (products.isEmpty) {
+                      builder: (context, productsState) {
+                        if (productsState.isEmpty) {
                           return const Center(
                             child: Text(
                               'No hay productos disponibles',
@@ -145,13 +148,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
                               crossAxisCount: 2,
                               mainAxisExtent: 250,
                             ),
-                            itemCount: products.length,
+                            itemCount: productsState.length,
                             itemBuilder: (context, index) {
-                              final product = products[index];
+                              final product = productsState[index];
                               return Container(
                                 padding: const EdgeInsets.only(
                                   top: kDefaultPadding * 4,
                                 ),
+                                clipBehavior: Clip.hardEdge,
                                 decoration: BoxDecoration(
                                   color: kError,
                                   image: DecorationImage(

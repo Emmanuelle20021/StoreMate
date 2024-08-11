@@ -2,10 +2,13 @@ import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:store_mate/app/data/utils/constants/constants.dart';
+import 'package:store_mate/app/domain/models/sale_detail.dart';
 import 'package:store_mate/app/presentation/bloc/products_cubit.dart';
+import 'package:store_mate/app/presentation/bloc/sale_detail_cubit.dart';
 
 import '../../../../data/utils/constants/themes.dart';
 import '../../../../domain/models/product.dart';
+import '../components/sale_details_card.dart';
 
 class NewSaleScreen extends StatefulWidget {
   const NewSaleScreen({super.key});
@@ -16,11 +19,9 @@ class NewSaleScreen extends StatefulWidget {
 
 class _NewSaleScreenState extends State<NewSaleScreen> {
   Product? selected;
-  List<Product> selectedProducts = [];
 
   @override
   Widget build(BuildContext context) {
-    List<Product> products = context.read<ProductsCubit>().state;
     String displayStringForOption(Product option) => option.name;
 
     return Scaffold(
@@ -66,43 +67,51 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: Autocomplete<Product>(
-                            fieldViewBuilder: (context, textEditingController,
-                                focusNode, onFieldSubmitted) {
-                              return TextFormField(
-                                controller: textEditingController,
-                                focusNode: focusNode,
-                                onFieldSubmitted: (value) {
-                                  debugPrint(value);
+                          child: BlocBuilder<ProductsCubit, List<Product>>(
+                            builder: (context, productsState) {
+                              return Autocomplete<Product>(
+                                fieldViewBuilder: (
+                                  context,
+                                  textEditingController,
+                                  focusNode,
+                                  onFieldSubmitted,
+                                ) {
+                                  return TextFormField(
+                                    controller: textEditingController,
+                                    focusNode: focusNode,
+                                    decoration: const InputDecoration(
+                                      hintText: 'Buscar producto',
+                                      border: OutlineInputBorder(),
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: kDefaultPadding,
+                                        vertical: kDefaultPadding / 2,
+                                      ),
+                                    ),
+                                  );
                                 },
-                                decoration: const InputDecoration(
-                                  hintText: 'Buscar producto',
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: kDefaultPadding,
-                                    vertical: kDefaultPadding / 2,
-                                  ),
-                                ),
-                              );
-                            },
-                            onSelected: (option) {
-                              setState(() {
-                                selected = option;
-                              });
-                            },
-                            displayStringForOption: displayStringForOption,
-                            optionsBuilder: (textEditingValue) {
-                              if (textEditingValue.text == '') {
-                                return products;
-                              }
-                              return products.where(
-                                (Product option) {
-                                  return option.name.toLowerCase().contains(
-                                      textEditingValue.text.toLowerCase());
+                                onSelected: (option) {
+                                  setState(() {
+                                    selected = option;
+                                  });
+                                },
+                                displayStringForOption: displayStringForOption,
+                                optionsBuilder: (textEditingValue) {
+                                  if (textEditingValue.text == '') {
+                                    return productsState;
+                                  }
+                                  return productsState.where(
+                                    (Product option) {
+                                      return option.name.toLowerCase().contains(
+                                          textEditingValue.text.toLowerCase());
+                                    },
+                                  );
                                 },
                               );
                             },
                           ),
+                        ),
+                        const SizedBox(
+                          width: kDefaultGap,
                         ),
                         ElevatedButton.icon(
                           onPressed: _addProductToSale,
@@ -147,11 +156,12 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                       onPressed: () async {
                         ScanResult response = await BarcodeScanner.scan();
                         setState(() {
-                          selected = products.firstWhere(
-                            (product) =>
-                                product.id.toString() ==
-                                response.rawContent.toString(),
-                          );
+                          selected =
+                              context.read<ProductsCubit>().state.firstWhere(
+                                    (product) =>
+                                        product.id.toString() ==
+                                        response.rawContent.toString(),
+                                  );
                         });
                         _addProductToSale();
                       },
@@ -166,36 +176,48 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                   ),
                   const SizedBox(height: kDefaultGap),
                   Expanded(
-                    child: selectedProducts.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'Aun no hay productos en la venta',
-                              style: TextStyle(
-                                color: kTextColor,
-                                fontSize: kLargeText,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: selectedProducts.length,
-                            itemBuilder: (context, index) {
-                              return ListTile(
-                                title: Text(products[index].name),
-                                subtitle:
-                                    Text(products[index].price.toString()),
-                                trailing: IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    // Remove product from sale
-                                    setState(() {
-                                      selectedProducts.removeAt(index);
-                                    });
-                                  },
+                    child: BlocBuilder<SaleDetailCubit, List<SaleDetail>>(
+                      builder: (context, detailsState) {
+                        return detailsState.isEmpty
+                            ? const Center(
+                                child: Text(
+                                  'Aun no hay productos en la venta',
+                                  style: TextStyle(
+                                    color: kTextColor,
+                                    fontSize: kLargeText,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
+                              )
+                            : ListView.builder(
+                                itemCount: detailsState.length,
+                                itemBuilder: (context, index) {
+                                  Product product = context
+                                      .read<ProductsCubit>()
+                                      .state
+                                      .firstWhere(
+                                        (product) =>
+                                            product.id ==
+                                            detailsState[index].productId,
+                                      );
+                                  return SaleDetailCard(
+                                    product: product,
+                                    onPressed: () {
+                                      // Remove product from sale
+                                      List<SaleDetail> details = context
+                                          .read<SaleDetailCubit>()
+                                          .state
+                                          .toList();
+                                      details.removeAt(index);
+                                      context
+                                          .read<SaleDetailCubit>()
+                                          .changeDetails(details);
+                                    },
+                                  );
+                                },
                               );
-                            },
-                          ),
+                      },
+                    ),
                   )
                 ],
               ),
@@ -210,10 +232,21 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
   void _addProductToSale() {
     if (selected != null) {
       // Add product to sale
-      setState(() {
-        selectedProducts.add(selected!);
-        selected = null;
-      });
+      SaleDetail newSaleDetail = SaleDetail(
+        productId: selected!.id!,
+        quantity: 1,
+        saleId: 0,
+      );
+      final List<SaleDetail> details =
+          context.read<SaleDetailCubit>().state.toList();
+      bool isAlreadyInSale = details.any(
+        (element) => element.productId == selected!.id,
+      );
+      if (isAlreadyInSale) {
+        return;
+      }
+      details.add(newSaleDetail);
+      context.read<SaleDetailCubit>().changeDetails(details);
     } else {
       // Show error message
       showDialog(

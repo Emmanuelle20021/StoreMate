@@ -326,10 +326,14 @@ class _NewProductScreenState extends State<NewProductScreen> {
         bool isSaved = await productRepository.insert(
           row: newProduct,
         );
-        if (isSaved) {
+        Product? lastProduct = await productRepository.getProduct(
+          where: 'product_name = ?',
+          whereArgs: [newProduct.name],
+        );
+        if (isSaved && lastProduct != null) {
           ProductsCubit productsCubit = context.read<ProductsCubit>();
-          List<Product> products = productsCubit.state;
-          products.add(newProduct);
+          List<Product> products = productsCubit.state.toList();
+          products.add(lastProduct);
           productsCubit.changeProducts(products);
         }
         return isSaved;

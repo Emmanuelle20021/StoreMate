@@ -253,8 +253,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(height: kDefaultGap),
                           Expanded(
-                            child: Builder(
-                              builder: (context) {
+                            child: BlocBuilder<SalesCubit, List<Sale>>(
+                              builder: (context, salesState) {
                                 if (salesCubit.state.isEmpty) {
                                   return const Center(
                                     child: Text(
