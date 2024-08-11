@@ -58,4 +58,46 @@ class Product extends Mappable {
   String toString() {
     return 'Product{id: $id, name: $name, price: $price, description: $description, category: $category, imagePath: $imagePath, qrCodePath: $qrCodePath, enable: $enable}';
   }
+
+  copyWith({
+    String? name,
+    double? price,
+    String? description,
+    String? category,
+    String? imagePath,
+    String? qrCodePath,
+    bool? enable,
+  }) {
+    return Product(
+      id: id,
+      name: name ?? this.name,
+      price: price ?? this.price,
+      description: description ?? this.description,
+      category: category ?? this.category,
+      imagePath: imagePath ?? this.imagePath,
+      qrCodePath: qrCodePath ?? this.qrCodePath,
+      enable: enable ?? this.enable,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Product &&
+        other.runtimeType == runtimeType &&
+        other.hashCode == hashCode;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        name.hashCode ^
+        price.hashCode ^
+        description.hashCode ^
+        category.hashCode ^
+        imagePath.hashCode ^
+        qrCodePath.hashCode ^
+        enable.hashCode;
+  }
 }
