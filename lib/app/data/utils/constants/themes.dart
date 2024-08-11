@@ -115,6 +115,7 @@ const Color kLightTextColor = Color(0xFF666666);
 const Color kBackground = Color(0xFFF5F5F5);
 const Color kOnBackground = Color(0xFF333333);
 const Color kError = Color(0xFFB00020);
+const Color kCheckColor = Color(0xFF008000);
 const Color kOnError = Color(0xFFFFFFFF);
 const Color kOnSurface = Color(0xFF333333);
 const Color kPrimarylight = Color(0x33FF5000);
