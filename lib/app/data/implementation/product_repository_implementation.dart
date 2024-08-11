@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:store_mate/app/domain/models/product.dart';
 import 'package:store_mate/app/domain/repositories/database_repository.dart';
 import 'package:store_mate/app/domain/repositories/product_repository.dart';
@@ -64,7 +63,6 @@ class ProductImplementation implements ProductRepository {
     }
     List<Product> products = [];
     for (Map<String, Object?> product in response) {
-      debugPrint('product: $product');
       products.add(
         Product.fromMap(product),
       );
