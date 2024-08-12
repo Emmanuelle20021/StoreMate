@@ -8,4 +8,10 @@ class SaleDetailCubit extends Cubit<List<SaleDetail>> {
   void changeDetails(List<SaleDetail> details) {
     emit(details);
   }
+
+  void updateSaleDetail(newSaleDetail, int index) {
+    final details = state.toList();
+    details[index] = newSaleDetail;
+    emit(details);
+  }
 }
