@@ -22,4 +22,16 @@ class SummaryData {
   set setLastTime(TimeOfDay lastTime) {
     this.lastTime = lastTime;
   }
+
+  copyWith({
+    int? sales,
+    double? totalAmount,
+    TimeOfDay? lastTime,
+  }) {
+    return SummaryData(
+      sales: sales ?? this.sales,
+      totalAmount: totalAmount ?? this.totalAmount,
+      lastTime: lastTime ?? this.lastTime,
+    );
+  }
 }

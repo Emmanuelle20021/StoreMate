@@ -16,18 +16,18 @@ class SaleDetail extends Mappable {
   @override
   Map<String, Object?> toMap() {
     return {
-      'productId': productId,
-      'saleId': saleId,
-      'quantity': quantity,
+      'product_id': productId,
+      'sale_id': saleId,
+      'detail_quantity': quantity,
     };
   }
 
   static SaleDetail fromMap(Map<String, Object?> map) {
     return SaleDetail(
-      id: map['id'] as int,
-      productId: map['productId'] as int,
-      saleId: map['saleId'] as int,
-      quantity: map['quantity'] as int,
+      id: map['detail_id'] as int,
+      productId: map['product_id'] as int,
+      saleId: map['sale_id'] as int,
+      quantity: map['detail_quantity'] as int,
     );
   }
 
