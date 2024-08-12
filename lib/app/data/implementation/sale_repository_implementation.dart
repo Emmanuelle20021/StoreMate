@@ -7,20 +7,20 @@ import '../../domain/repositories/sale_repository.dart';
 
 class SaleImplementation implements SaleRepository {
   SaleImplementation({
-    required DatabaseRepository databaseImplementation,
+    required this.databaseImplementation,
   });
 
-  DatabaseRepository? databaseImplementation;
+  DatabaseRepository databaseImplementation;
   final String tableName = 'Sale';
 
   @override
   Future<bool> deleteSale({String? where, List<Object>? whereArgs}) async {
-    final int? response = await databaseImplementation?.delete(
+    final int response = await databaseImplementation.delete(
       table: tableName,
       where: where,
       whereArgs: whereArgs,
     );
-    if (response == null || response == 0) {
+    if (response == 0) {
       return false;
     }
     return true;
@@ -33,7 +33,7 @@ class SaleImplementation implements SaleRepository {
     String? orderBy,
     int? limit,
   }) async {
-    final response = await databaseImplementation?.getFrom(
+    final response = await databaseImplementation.getFrom(
       table: tableName,
       limit: limit,
       orderBy: orderBy,
@@ -56,7 +56,7 @@ class SaleImplementation implements SaleRepository {
     String? orderBy,
     int? limit,
   }) async {
-    final response = await databaseImplementation?.getAllFrom(
+    final response = await databaseImplementation.getAllFrom(
       table: tableName,
       limit: limit,
       orderBy: orderBy,
@@ -80,11 +80,12 @@ class SaleImplementation implements SaleRepository {
 
   @override
   Future<bool> insert({required Sale row}) async {
-    final int? response = await databaseImplementation?.insertInto(
+    final int response = await databaseImplementation.insertInto(
       table: tableName,
       row: row.toMap(),
     );
-    if (response == null || response == 0) {
+
+    if (response == 0) {
       return false;
     }
     return true;
@@ -96,13 +97,13 @@ class SaleImplementation implements SaleRepository {
     String? where,
     List<Object>? whereArgs,
   }) async {
-    final int? response = await databaseImplementation?.update(
+    final int response = await databaseImplementation.update(
       table: tableName,
       row: row.toMap(),
       where: where,
       whereArgs: whereArgs,
     );
-    if (response == null || response == 0) {
+    if (response == 0) {
       return false;
     }
     return true;
@@ -112,12 +113,12 @@ class SaleImplementation implements SaleRepository {
   Future<SummaryData> todaySales() async {
     String today = DateTime.now().toString().substring(0, 10);
     final List<Map<String, Object?>>? sales =
-        await databaseImplementation?.getAllFrom(
+        await databaseImplementation.getAllFrom(
       table: tableName,
-      where: 'sale_enable = 1 and sale_creation_date = $today',
+      where: 'sale_enable = 1 and sale_creation_date LIKE "%$today%"',
     );
     double totalAmount = 0;
-    if (sales == null) {
+    if (sales == null || sales.isEmpty) {
       return SummaryData(
         sales: 0,
         totalAmount: 0,
@@ -128,11 +129,12 @@ class SaleImplementation implements SaleRepository {
       Sale sale = Sale.fromMap(element);
       totalAmount += sale.totalAmount;
     }
+    final Map<String, Object?> last = sales.last;
     return SummaryData(
       sales: sales.length,
       totalAmount: totalAmount,
       lastTime: TimeOfDay.fromDateTime(
-        DateTime.parse(sales.last['sale_creation_time'] as String),
+        DateTime.parse(last['sale_creation_date'] as String),
       ),
     );
   }

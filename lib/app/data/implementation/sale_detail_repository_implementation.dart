@@ -4,7 +4,7 @@ import '../../domain/repositories/sale_detail_repository.dart';
 
 class SaleDetailImplementation implements SaleDetailRepository {
   SaleDetailImplementation({
-    required DatabaseRepository databaseImplementation,
+    required this.databaseImplementation,
   });
 
   DatabaseRepository? databaseImplementation;
