@@ -1,13 +1,23 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:store_mate/app/data/utils/constants/constants.dart';
+import 'package:store_mate/app/data/utils/injector.dart';
 import 'package:store_mate/app/domain/models/sale_detail.dart';
+import 'package:store_mate/app/domain/models/summary_data.dart';
+import 'package:store_mate/app/domain/repositories/sale_repository.dart';
+import 'package:store_mate/app/presentation/bloc/blocs.dart';
 import 'package:store_mate/app/presentation/bloc/products_cubit.dart';
 import 'package:store_mate/app/presentation/bloc/sale_detail_cubit.dart';
+import 'package:store_mate/app/presentation/bloc/sales_cubit.dart';
+import 'package:store_mate/app/presentation/bloc/total_amount_sale.dart';
 
 import '../../../../data/utils/constants/themes.dart';
 import '../../../../domain/models/product.dart';
+import '../../../../domain/models/sale.dart';
+import '../../../../domain/repositories/sale_detail_repository.dart';
 import '../components/sale_details_card.dart';
 
 class NewSaleScreen extends StatefulWidget {
@@ -19,6 +29,7 @@ class NewSaleScreen extends StatefulWidget {
 
 class _NewSaleScreenState extends State<NewSaleScreen> {
   Product? selected;
+  bool enable = true;
 
   @override
   Widget build(BuildContext context) {
@@ -202,23 +213,49 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                                       );
                                   return SaleDetailCard(
                                     product: product,
-                                    onPressed: () {
-                                      // Remove product from sale
-                                      List<SaleDetail> details = context
-                                          .read<SaleDetailCubit>()
-                                          .state
-                                          .toList();
-                                      details.removeAt(index);
-                                      context
-                                          .read<SaleDetailCubit>()
-                                          .changeDetails(details);
-                                    },
+                                    index: index,
                                   );
                                 },
                               );
                       },
                     ),
-                  )
+                  ),
+                  BlocBuilder<TotalAmountSaleCubit, double>(
+                    builder: (context, totalAmountSaleState) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Total: \$${totalAmountSaleState.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              color: kOnBackground,
+                              fontSize: kLargeText,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: () async {
+                              if (enable) {
+                                bool response = await _saveNewSale(context);
+                                if (mounted) {
+                                  createDialog(context, response).then(
+                                    (_) => {
+                                      if (!enable)
+                                        {
+                                          Navigator.pop(context),
+                                        }
+                                    },
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.save),
+                            label: const Text('Guardar'),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -228,7 +265,121 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
     );
   }
 
-  void _saveNewSale() {}
+  Future<void> createDialog(BuildContext context, bool response) {
+    if (response) {
+      return showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text(
+            'Venta guardada',
+            style: TextStyle(
+              color: kTextColor,
+              fontSize: kExtraLargeText,
+            ),
+          ),
+          icon: const Icon(
+            Icons.check,
+            size: kCircleDecorationSmallSize,
+          ),
+          iconColor: kPrimary,
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Aceptar'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            alignment: Alignment.center,
+            icon: const Icon(
+              Icons.info,
+              color: kPrimary,
+              size: kCircleDecorationSmallSize,
+            ),
+            title: const Text('¡Algo salió mal!'),
+            content: const Text(
+              'No se pudo agregar la venta.',
+              textAlign: TextAlign.center,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Aceptar'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Future<bool> _saveNewSale(BuildContext context) async {
+    DateTime date = DateTime.now();
+    Sale newSale = Sale(
+      date: date.toString(),
+      totalAmount: context.read<TotalAmountSaleCubit>().state,
+      enable: 1,
+    );
+    SaleRepository saleRepository = Injector.of(context).saleRepository;
+
+    try {
+      bool isSaved = await saleRepository.insert(row: newSale);
+
+      if (isSaved) {
+        Sale? saleWithId = await saleRepository.getSale(
+          where: 'sale_creation_date = ?',
+          whereArgs: [
+            date.toString(),
+          ],
+        );
+        if (saleWithId != null && mounted) {
+          SaleDetailRepository saleDetailRepository =
+              Injector.of(context).saleDetailRepository;
+          final List<SaleDetail> saleDetails =
+              context.read<SaleDetailCubit>().state;
+          for (var detail in saleDetails) {
+            final detailWithId = detail.copyWith(saleId: saleWithId.id);
+            await saleDetailRepository.insert(row: detailWithId);
+          }
+
+          if (mounted) {
+            final List<Sale> sales = context.read<SalesCubit>().state.toList();
+            sales.add(saleWithId);
+            final SummaryData oldProfit =
+                context.read<TodayProfitCubit>().state;
+
+            final totalAmount = oldProfit.totalAmount +
+                context.read<TotalAmountSaleCubit>().state;
+            final newProfit = SummaryData(
+              sales: sales.length,
+              totalAmount: totalAmount,
+              lastTime: TimeOfDay.fromDateTime(date),
+            );
+            context.read<TodayProfitCubit>().changeProfit(newProfit);
+            context.read<SalesCubit>().changeSales(sales);
+            context.read<SaleDetailCubit>().changeDetails([]);
+            context.read<TotalAmountSaleCubit>().changeTotalAmount(0);
+          }
+          return true;
+        }
+      }
+      return false;
+    } catch (exception) {
+      //
+      if (mounted) createDialog(context, false);
+      return false;
+    }
+  }
+
   void _addProductToSale() {
     if (selected != null) {
       // Add product to sale
@@ -246,9 +397,9 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
         return;
       }
       details.add(newSaleDetail);
+      context.read<TotalAmountSaleCubit>().addAmount(selected!.price);
       context.read<SaleDetailCubit>().changeDetails(details);
     } else {
-      // Show error message
       showDialog(
         context: context,
         builder: (context) {
@@ -261,7 +412,8 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
             ),
             title: const Text('¡Vaya!'),
             content: const Text(
-              'Debe seleccionar un producto para agregar a la venta.',
+              'Debes seleccionar un producto.',
+              textAlign: TextAlign.center,
             ),
             actions: [
               TextButton(
