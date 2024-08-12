@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
       SaleRepository saleRepository = Injector.of(context).saleRepository;
       ProductRepository productRepository =
           Injector.of(context).productRepository;
-      SummaryData todayProfit = await saleRepository.todaySales();
+      SummaryData? todayProfit = await saleRepository.todaySales();
       List<Sale>? sales = await saleRepository.getSales();
       List<Product>? responseProducts = await productRepository.getProducts();
       if (mounted) {
@@ -266,11 +266,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   );
                                 }
-                                return ListView.builder(
-                                  itemCount: salesCubit.state.length,
-                                  itemBuilder: (context, index) {
-                                    return const SaleCard();
-                                  },
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: kDefaultPadding,
+                                  ),
+                                  child: ListView.builder(
+                                    itemCount: salesCubit.state.length,
+                                    itemBuilder: (context, index) {
+                                      return SaleCard(
+                                        sale: salesCubit.state[index],
+                                      );
+                                    },
+                                  ),
                                 );
                               },
                             ),
