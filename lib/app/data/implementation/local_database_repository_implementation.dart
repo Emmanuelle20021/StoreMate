@@ -66,7 +66,7 @@ class LocalDatatabaseImplementation implements DatabaseRepository {
     );
     await db.execute(
       '''CREATE TABLE `$_salesTable` (
-	    `sale_id` INTEGER NOT NULL  UNIQUE,
+	    `sale_id` INTEGER NOT NULL UNIQUE,
 	    `sale_creation_date` TEXT NOT NULL,
 	    `sale_total_amount` REAL NOT NULL,
 	    `sale_enable` INTEGER DEFAULT 1,
@@ -183,14 +183,18 @@ class LocalDatatabaseImplementation implements DatabaseRepository {
     required String table,
     required Map<String, dynamic> row,
   }) async {
-    final Database? db = await database;
-    if (db != null && db.isOpen) {
-      return db.insert(
-        table,
-        row,
-      );
-    } else {
-      return Future.value(0);
+    try {
+      final Database? db = await database;
+      if (db != null && db.isOpen) {
+        return db.insert(
+          table,
+          row,
+        );
+      } else {
+        return Future.value(0);
+      }
+    } catch (e) {
+      return Future.error('error: $e');
     }
   }
 
