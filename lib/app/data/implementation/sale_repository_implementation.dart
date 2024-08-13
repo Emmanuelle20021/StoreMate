@@ -115,7 +115,8 @@ class SaleImplementation implements SaleRepository {
     final List<Map<String, Object?>>? sales =
         await databaseImplementation.getAllFrom(
       table: tableName,
-      where: 'sale_enable = 1 and sale_creation_date LIKE "%$today%"',
+      where: 'sale_enable = ? AND sale_creation_date LIKE ?',
+      whereArgs: ['1', '%$today%'],
     );
     double totalAmount = 0;
     if (sales == null || sales.isEmpty) {

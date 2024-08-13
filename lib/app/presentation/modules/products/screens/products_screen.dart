@@ -213,7 +213,13 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                       SizedBox(
                                         width: double.infinity,
                                         child: LightPrimaryButton(
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            Navigator.pushNamed(
+                                              context,
+                                              Routes.productDetail,
+                                              arguments: product,
+                                            );
+                                          },
                                           text: 'Ver detalles',
                                         ),
                                       ),

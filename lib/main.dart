@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:store_mate/app/data/implementation/local_database_repository_implementation.dart';
 import 'package:store_mate/app/data/implementation/product_repository_implementation.dart';
 import 'package:store_mate/app/data/implementation/sale_detail_repository_implementation.dart';
@@ -11,8 +13,12 @@ import 'package:store_mate/app/presentation/routes/routes.dart';
 import 'app/data/utils/constants/constants.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   final db = LocalDatatabaseImplementation();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   runApp(
     Injector(
       productRepository: ProductImplementation(databaseImplementation: db),

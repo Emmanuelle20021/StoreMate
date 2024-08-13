@@ -9,6 +9,7 @@ import 'package:store_mate/app/domain/models/sale_detail.dart';
 import 'package:store_mate/app/domain/models/summary_data.dart';
 import 'package:store_mate/app/domain/repositories/sale_repository.dart';
 import 'package:store_mate/app/presentation/bloc/blocs.dart';
+import 'package:store_mate/app/presentation/bloc/last_sales_cubit.dart';
 import 'package:store_mate/app/presentation/bloc/products_cubit.dart';
 import 'package:store_mate/app/presentation/bloc/sale_detail_cubit.dart';
 import 'package:store_mate/app/presentation/bloc/sales_cubit.dart';
@@ -293,6 +294,7 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
         ),
       );
     } else {
+      enable = true;
       return showDialog(
         context: context,
         builder: (context) {
@@ -323,6 +325,7 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
   }
 
   Future<bool> _saveNewSale(BuildContext context) async {
+    enable = false;
     DateTime date = DateTime.now();
     Sale newSale = Sale(
       date: date.toString(),
@@ -366,16 +369,19 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
             );
             context.read<TodayProfitCubit>().changeProfit(newProfit);
             context.read<SalesCubit>().changeSales(sales);
+            context.read<LastSalesCubit>().updateLastSales(newSale);
             context.read<SaleDetailCubit>().changeDetails([]);
             context.read<TotalAmountSaleCubit>().changeTotalAmount(0);
           }
           return true;
         }
       }
+      enable = true;
       return false;
     } catch (exception) {
       //
       if (mounted) createDialog(context, false);
+      enable = true;
       return false;
     }
   }

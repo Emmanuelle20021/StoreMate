@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:store_mate/app/data/utils/constants/constants.dart';
 import 'package:store_mate/app/data/utils/constants/themes.dart';
 import 'package:store_mate/app/data/utils/injector.dart';
@@ -27,6 +30,7 @@ class _NewProductScreenState extends State<NewProductScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final ScreenshotController screenshotController = ScreenshotController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late FocusNode _priceFocusNode;
   late FocusNode _descriptionFocusNode;
@@ -330,11 +334,59 @@ class _NewProductScreenState extends State<NewProductScreen> {
           where: 'product_name = ?',
           whereArgs: [newProduct.name],
         );
+
         if (isSaved && lastProduct != null) {
-          ProductsCubit productsCubit = context.read<ProductsCubit>();
-          List<Product> products = productsCubit.state.toList();
-          products.add(lastProduct);
-          productsCubit.changeProducts(products);
+          final filename = lastProduct.name.replaceAll(' ', '_');
+          final image = await screenshotController.captureFromWidget(
+            QrImageView(
+              data: lastProduct.id.toString(),
+              version: QrVersions.auto,
+              size: 100.0,
+            ),
+          );
+
+          // Solicitar permisos
+          await Permission.storage.request();
+          // Obtener el directorio de documentos de la aplicación
+
+          final qrDirectory = Directory('/storage/emulated/0/Pictures/QR');
+
+          // Verificar si el directorio QR existe
+          if (!await qrDirectory.exists()) {
+            // Crear el directorio si no existe
+            await qrDirectory.create(recursive: true);
+          }
+
+          // Crear el archivo en el directorio QR
+          final filePath = '${qrDirectory.path}/$filename.png';
+          debugPrint(filePath);
+          final file = File(filePath);
+
+          // Escribir los bytes en el archivo
+          await file.writeAsBytes(image);
+          // Notifica al sistema de medios para que reescanee la carpeta
+          const MethodChannel channel = MethodChannel('com.example.app/media');
+          await channel.invokeMethod('scanFile', {'path': filePath});
+
+          lastProduct = lastProduct.copyWith(
+            qrCodePath: filePath,
+          );
+          final bool isSavedQR = await productRepository.update(
+            row: lastProduct!,
+            where: 'product_id = ?',
+            whereArgs: [lastProduct.id!],
+          );
+          if (isSavedQR && lastProduct.id != null) {
+            Product? lastProductWithQR = await productRepository.getProduct(
+              where: 'product_id = ?',
+              whereArgs: [lastProduct.id!],
+            );
+            if (lastProductWithQR == null) return false;
+            ProductsCubit productsCubit = context.read<ProductsCubit>();
+            List<Product> products = productsCubit.state.toList();
+            products.add(lastProductWithQR);
+            productsCubit.changeProducts(products);
+          }
         }
         return isSaved;
       } else {

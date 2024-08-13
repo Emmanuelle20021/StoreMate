@@ -8,8 +8,10 @@ class SaleCard extends StatelessWidget {
   const SaleCard({
     super.key,
     required this.sale,
+    required this.onPressed,
   });
   final Sale sale;
+  final Function() onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +78,7 @@ class SaleCard extends StatelessWidget {
               height: kDefaultGap,
             ),
             LightPrimaryButton(
-              onPressed: () {},
+              onPressed: onPressed,
               text: 'Ver detalle',
             )
           ],

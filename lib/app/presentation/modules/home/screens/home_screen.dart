@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:store_mate/app/data/utils/constants/themes.dart';
 import 'package:store_mate/app/domain/models/summary_data.dart';
 import 'package:store_mate/app/domain/repositories/sale_repository.dart';
+import 'package:store_mate/app/presentation/bloc/last_sales_cubit.dart';
 import 'package:store_mate/app/presentation/bloc/today_profit_cubit.dart';
 import 'package:store_mate/app/presentation/bloc/sales_cubit.dart';
 import 'package:store_mate/app/presentation/routes/routes.dart';
@@ -32,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initData();
     });
+    FlutterNativeSplash.remove();
   }
 
   Future<void> _initData() async {
@@ -40,7 +43,14 @@ class _HomeScreenState extends State<HomeScreen> {
       ProductRepository productRepository =
           Injector.of(context).productRepository;
       SummaryData? todayProfit = await saleRepository.todaySales();
+      String today = DateTime.now().toString().substring(0, 10);
       List<Sale>? sales = await saleRepository.getSales();
+      List<Sale>? lastSales = await saleRepository.getSales(
+        where: 'sale_creation_date LIKE ?',
+        whereArgs: ['%$today%'],
+        limit: 3,
+        orderBy: 'sale_creation_date DESC',
+      );
       List<Product>? responseProducts = await productRepository.getProducts();
       if (mounted) {
         context.read<TodayProfitCubit>().changeProfit(todayProfit);
@@ -49,6 +59,9 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         if (sales != null) {
           context.read<SalesCubit>().changeSales(sales);
+        }
+        if (lastSales != null) {
+          context.read<LastSalesCubit>().changeLastSales(lastSales);
         }
       }
     } catch (e) {
@@ -59,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     TodayProfitCubit todayProfitCubit = context.watch<TodayProfitCubit>();
-    SalesCubit salesCubit = context.watch<SalesCubit>();
+    LastSalesCubit lastSalesCubit = context.watch<LastSalesCubit>();
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -255,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Expanded(
                             child: BlocBuilder<SalesCubit, List<Sale>>(
                               builder: (context, salesState) {
-                                if (salesCubit.state.isEmpty) {
+                                if (salesState.isEmpty) {
                                   return const Center(
                                     child: Text(
                                       'No hay ventas recientes',
@@ -271,10 +284,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                     horizontal: kDefaultPadding,
                                   ),
                                   child: ListView.builder(
-                                    itemCount: salesCubit.state.length,
+                                    itemCount: lastSalesCubit.state.length,
                                     itemBuilder: (context, index) {
                                       return SaleCard(
-                                        sale: salesCubit.state[index],
+                                        sale: lastSalesCubit.state[index],
+                                        onPressed: () {
+                                          Navigator.pushNamed(
+                                            context,
+                                            Routes.saleDetail,
+                                            arguments:
+                                                lastSalesCubit.state[index],
+                                          );
+                                        },
                                       );
                                     },
                                   ),
