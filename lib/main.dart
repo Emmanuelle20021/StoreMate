@@ -1,185 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:store_mate/constants/themes.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:store_mate/app/data/implementation/local_database_repository_implementation.dart';
+import 'package:store_mate/app/data/implementation/product_repository_implementation.dart';
+import 'package:store_mate/app/data/implementation/sale_detail_repository_implementation.dart';
+import 'package:store_mate/app/data/implementation/sale_repository_implementation.dart';
+import 'package:store_mate/app/data/utils/constants/themes.dart';
+import 'package:store_mate/app/data/utils/injector.dart';
+import 'package:store_mate/app/presentation/bloc/bloc_provider.dart';
+import 'package:store_mate/app/presentation/routes/app_routes.dart';
+import 'package:store_mate/app/presentation/routes/routes.dart';
+import 'app/data/utils/constants/constants.dart';
 
-void main() {
-  runApp(const ShopMate());
+void main() async {
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  final db = LocalDatatabaseImplementation();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
+  runApp(
+    Injector(
+      productRepository: ProductImplementation(databaseImplementation: db),
+      saleDetailRepository: SaleDetailImplementation(
+        databaseImplementation: db,
+      ),
+      saleRepository: SaleImplementation(databaseImplementation: db),
+      child: const ShopMate(),
+    ),
+  );
 }
 
-class ShopMate extends StatelessWidget {
+class ShopMate extends StatefulWidget {
   const ShopMate({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'StoreMate',
-      home: const HomeScreen(),
-      themeMode: ThemeMode.system,
-      theme: lightTheme,
-      darkTheme: darkTheme,
-    );
-  }
+  State<ShopMate> createState() => _ShopMateState();
 }
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
+class _ShopMateState extends State<ShopMate> {
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
-  final _pageController = PageController(initialPage: 0);
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        children: const [
-          SalesScreen(),
-          Center(
-            child: Text('Welcome to page 2'),
-          ),
-          Center(
-            child: Text('Welcome to page 3'),
-          ),
-        ],
-        onPageChanged: (index) => _changePage(index),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => _changePage(index),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Productos',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Configuración',
-          ),
-        ],
-      ),
-    );
+  void initState() {
+    super.initState();
+    _requestPermissions();
   }
-
-  void _changePage(int index) {
-    setState(() {
-      _pageController.jumpToPage(index);
-      _currentIndex = index;
-    });
-  }
-}
-
-class SalesScreen extends StatefulWidget {
-  const SalesScreen({super.key});
-
-  @override
-  State<SalesScreen> createState() => _SalesScreenState();
-}
-
-class _SalesScreenState extends State<SalesScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ventas'),
-      ),
-      body: const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            SalesSummaryWidget(
-              totalSales: 100,
-              numberOfTransactions: 21,
-              averageSale: 50,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Nueva venta',
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-}
-
-class SalesSummaryWidget extends StatelessWidget {
-  final double totalSales;
-  final int numberOfTransactions;
-  final double averageSale;
-
-  const SalesSummaryWidget({
-    super.key,
-    required this.totalSales,
-    required this.numberOfTransactions,
-    required this.averageSale,
-  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.blue,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Resumen de Ventas',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 10.0),
-          Wrap(
-            spacing: 20.0,
-            children: [
-              _buildSummaryItem(
-                  'Total de Ventas', '\$${totalSales.toStringAsFixed(2)}'),
-              _buildSummaryItem(
-                  'Número de Transacciones', numberOfTransactions.toString()),
-              _buildSummaryItem(
-                  'Venta Promedio', '\$${averageSale.toStringAsFixed(2)}'),
-            ],
-          ),
-        ],
+    return BlocsProvider(
+      child: MaterialApp(
+        title: kAppTitle,
+        routes: appRoutes,
+        initialRoute: Routes.home,
+        themeMode: ThemeMode.system,
+        theme: lightTheme,
       ),
     );
   }
+}
 
-  Widget _buildSummaryItem(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16.0,
-          ),
-        ),
-        const SizedBox(height: 5.0),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
+Future<void> _requestPermissions() async {
+  // Lista de permisos que necesitas
+  List<Permission> permissions = [
+    Permission.camera,
+    Permission.location,
+    Permission.storage,
+  ];
+
+  // Verifica el estado de cada permiso
+  for (var permission in permissions) {
+    if (await permission.isDenied) {
+      // Si el permiso es negado, lo solicita
+      await permission.request();
+    } else if (await permission.isPermanentlyDenied) {
+      // Si el permiso fue permanentemente negado, dirige al usuario a la configuración
+      openAppSettings();
+    }
   }
 }
