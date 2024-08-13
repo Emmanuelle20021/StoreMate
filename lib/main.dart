@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:store_mate/app/data/implementation/local_database_repository_implementation.dart';
 import 'package:store_mate/app/data/implementation/product_repository_implementation.dart';
 import 'package:store_mate/app/data/implementation/sale_detail_repository_implementation.dart';
@@ -31,8 +32,19 @@ void main() async {
   );
 }
 
-class ShopMate extends StatelessWidget {
+class ShopMate extends StatefulWidget {
   const ShopMate({super.key});
+
+  @override
+  State<ShopMate> createState() => _ShopMateState();
+}
+
+class _ShopMateState extends State<ShopMate> {
+  @override
+  void initState() {
+    super.initState();
+    _requestPermissions();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,5 +57,25 @@ class ShopMate extends StatelessWidget {
         theme: lightTheme,
       ),
     );
+  }
+}
+
+Future<void> _requestPermissions() async {
+  // Lista de permisos que necesitas
+  List<Permission> permissions = [
+    Permission.camera,
+    Permission.location,
+    Permission.storage,
+  ];
+
+  // Verifica el estado de cada permiso
+  for (var permission in permissions) {
+    if (await permission.isDenied) {
+      // Si el permiso es negado, lo solicita
+      await permission.request();
+    } else if (await permission.isPermanentlyDenied) {
+      // Si el permiso fue permanentemente negado, dirige al usuario a la configuración
+      openAppSettings();
+    }
   }
 }
