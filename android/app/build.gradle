@@ -21,17 +21,19 @@ if (localPropertiesFile.exists()) {
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
-    flutterVersionCode = '1'
+    // Cambia este valor por uno mayor que el último usado en Google Play Console
+    flutterVersionCode = '2'
 }
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
+    // Cambia este valor si es una nueva versión (ej. '1.1' si era '1.0')
+    flutterVersionName = '1.1'
 }
 
 android {
     compileSdkVersion 34
-    namespace "com.example.store_mate"
+    namespace "com.EmmaMora.StoreMate"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -47,7 +49,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.example.store_mate"
+        applicationId "com.EmmaMora.StoreMate"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
@@ -66,7 +68,8 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            minifyEnabled true // Puedes cambiar a true si deseas ofuscar tu código
+            minifyEnabled false // Cambia a true si deseas ofuscar tu código
+            shrinkResources false // Cambia a true si deseas eliminar recursos no utilizados
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -79,3 +82,4 @@ flutter {
 dependencies {
     // Añade aquí tus dependencias adicionales si las tienes
 }
+
