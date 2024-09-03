@@ -173,8 +173,6 @@ final ThemeData lightTheme = ThemeData(
     onSecondary: kOnSecondary,
     error: kError,
     onError: kOnError,
-    background: kBackground,
-    onBackground: kOnBackground,
     surface: kSurface,
     onSurface: kOnSurface,
   ),

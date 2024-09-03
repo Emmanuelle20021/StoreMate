@@ -17,10 +17,10 @@ class LightPrimaryButton extends StatelessWidget {
     return ElevatedButton(
       style: ButtonStyle(
         alignment: Alignment.center,
-        backgroundColor: MaterialStateProperty.all(
+        backgroundColor: WidgetStateProperty.all(
           kPrimarylight,
         ),
-        shadowColor: const MaterialStatePropertyAll(
+        shadowColor: const WidgetStatePropertyAll(
           kNoColor,
         ),
       ),

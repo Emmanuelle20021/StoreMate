@@ -62,17 +62,17 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     children: [
                       ElevatedButton(
                         style: ButtonStyle(
-                          fixedSize: MaterialStateProperty.all(
+                          fixedSize: WidgetStateProperty.all(
                             const Size(50, 50),
                           ),
-                          padding: MaterialStateProperty.all(
+                          padding: WidgetStateProperty.all(
                             const EdgeInsets.all(kNone),
                           ),
                           alignment: Alignment.center,
-                          backgroundColor: MaterialStateProperty.all(
+                          backgroundColor: WidgetStateProperty.all(
                             kContainer,
                           ),
-                          shape: MaterialStatePropertyAll(
+                          shape: WidgetStatePropertyAll(
                             RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
                                 kDefaultButtonRadius,
