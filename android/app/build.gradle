@@ -22,7 +22,9 @@ if (localPropertiesFile.exists()) {
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
     // Cambia este valor por uno mayor que el último usado en Google Play Console
-    flutterVersionCode = '2'
+    flutterVersionCode = '1'
+}else{
+    flutterVersionCode = '3'
 }
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
@@ -68,9 +70,14 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            minifyEnabled false // Cambia a true si deseas ofuscar tu código
-            shrinkResources false // Cambia a true si deseas eliminar recursos no utilizados
+            minifyEnabled true // Cambia a true si deseas ofuscar tu código
+            shrinkResources true // Cambia a true si deseas eliminar recursos no utilizados
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            ndk {
+                // Asegúrate de que los símbolos de depuración se generen
+                debugSymbolLevel 'FULL'
+            }
+        
         }
     }
 }
