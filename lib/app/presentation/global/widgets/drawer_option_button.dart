@@ -18,13 +18,13 @@ class DrawerOptionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       style: ButtonStyle(
-        shape: MaterialStatePropertyAll(
+        shape: WidgetStatePropertyAll(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kDefaultButtonRadius),
           ),
         ),
-        elevation: const MaterialStatePropertyAll(kNone),
-        overlayColor: MaterialStatePropertyAll(
+        elevation: const WidgetStatePropertyAll(kNone),
+        overlayColor: WidgetStatePropertyAll(
           kOnPrimary.withOpacity(kDefaultOverlayOpacity),
         ),
       ),

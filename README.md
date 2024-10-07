@@ -1,3 +1,16 @@
-# StoreMate
+# store_mate
 
-StoreMate es una innovadora aplicación móvil diseñada para empoderar a propietarios de pequeños negocios al proporcionarles una solución completa de punto de venta en la palma de su mano. Con StoreMate, los usuarios pueden gestionar fácilmente todas las facetas de su negocio, desde el seguimiento del inventario hasta el procesamiento de ventas, todo desde su propio teléfono inteligente.
+A new Flutter project.
+
+## Getting Started
+
+This project is a starting point for a Flutter application.
+
+A few resources to get you started if this is your first Flutter project:
+
+- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+
+For help getting started with Flutter development, view the
+[online documentation](https://docs.flutter.dev/), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.

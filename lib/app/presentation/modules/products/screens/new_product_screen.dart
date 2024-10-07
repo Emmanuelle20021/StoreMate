@@ -206,7 +206,7 @@ class _NewProductScreenState extends State<NewProductScreen> {
                           Expanded(
                             child: ElevatedButton(
                               style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(
+                                backgroundColor: WidgetStateProperty.all(
                                   kError,
                                 ),
                               ),
