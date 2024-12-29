@@ -137,8 +137,7 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                   Stack(
                     children: [
                       Divider(
-                        color:
-                            kOnBackground.withOpacity(kDefaultOverlayOpacity),
+                        color: kOnBackground.withAlpha(kDefaultOverlayOpacity),
                         thickness: 1,
                       ),
                       Center(

@@ -11,6 +11,7 @@ class CardButton extends StatelessWidget {
     required this.color,
     required this.textColor,
     this.overlayColor,
+    this.size,
   });
 
   final Function() onPressed;
@@ -19,18 +20,16 @@ class CardButton extends StatelessWidget {
   final Color color;
   final Color textColor;
   final Color? overlayColor;
+  final Size? size;
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         alignment: Alignment.center,
-        fixedSize: const Size(
-          100,
-          100,
-        ),
         padding: const EdgeInsets.all(kMinimunPaddingSize),
         backgroundColor: color,
+        fixedSize: size,
         foregroundColor: overlayColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(

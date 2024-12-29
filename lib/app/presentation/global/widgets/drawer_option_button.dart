@@ -25,7 +25,7 @@ class DrawerOptionButton extends StatelessWidget {
         ),
         elevation: const WidgetStatePropertyAll(kNone),
         overlayColor: WidgetStatePropertyAll(
-          kOnPrimary.withOpacity(kDefaultOverlayOpacity),
+          kOnPrimary.withAlpha(kDefaultOverlayOpacity),
         ),
       ),
       onPressed: onPressed,

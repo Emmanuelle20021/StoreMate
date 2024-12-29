@@ -61,7 +61,7 @@ class _ShopMateState extends State<ShopMate> {
 }
 
 Future<void> _requestPermissions() async {
-  // Lista de permisos que necesitas
+  // Lista de permisos necesarios
   List<Permission> permissions = [
     Permission.camera,
     Permission.location,

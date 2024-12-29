@@ -126,7 +126,7 @@ class _NewProductScreenState extends State<NewProductScreen> {
                         height: kCircleDecorationLargeSize,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: kLightTextColor.withOpacity(
+                          color: kLightTextColor.withAlpha(
                             kDefaultOverlayOpacity,
                           ),
                           borderRadius: BorderRadius.circular(

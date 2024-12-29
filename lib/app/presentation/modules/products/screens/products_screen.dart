@@ -116,7 +116,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         },
                         color: kPrimary,
                         searchIconColor: kOnPrimary,
-                        textFieldColor: kPrimary.withOpacity(.6),
+                        textFieldColor: kPrimary.withAlpha(150),
                         textFieldIconColor: kOnPrimary,
                         helpText: 'Buscar productos...',
                         boxShadow: false,
