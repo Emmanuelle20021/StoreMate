@@ -139,6 +139,11 @@ const double kExtraLargeText = 24;
 const double kFocusTextSize = 28;
 const double kDefaultDecorationOpacity = 0 - 3;
 const double kMinimunPaddingSize = 5;
+const String kDeliveringMatePath = 'assets/mate/mate_delivering.png';
+const String kOkMatePath = 'assets/mate/mate_ok.png';
+const String kProudMatePath = 'assets/mate/mate_proud.png';
+const String kWaitingMatePath = 'assets/mate/mate_waiting.png';
+const String kWelcomeMatePath = 'assets/mate/mate_welcome.png';
 
 Icon kMenuIcon = const Icon(
   Icons.menu,

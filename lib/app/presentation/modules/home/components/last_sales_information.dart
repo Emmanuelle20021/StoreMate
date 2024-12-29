@@ -39,19 +39,46 @@ class LastSalesWidget extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: kDefaultGap),
           Expanded(
             child: BlocBuilder<SalesCubit, List<Sale>>(
               builder: (context, salesState) {
                 if (salesState.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No hay ventas recientes',
-                      style: TextStyle(
-                        color: kTextColor,
-                        fontSize: kMediumText,
+                  return Wrap(
+                    runAlignment: WrapAlignment.center,
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Image.asset(
+                        kWelcomeMatePath,
+                        height: 150,
                       ),
-                    ),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            RichText(
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                text: 'Parece que no hay ventas recientes,\n',
+                                style: TextStyle(
+                                  color: kTextColor,
+                                  fontSize: kSmallText,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: 'que tal si creas una nueva',
+                                    style: TextStyle(
+                                      color: kPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   );
                 }
                 return Padding(
